@@ -13,7 +13,7 @@
 :root{
   color-scheme: light;
   --bg:#F2F3EE; --surface:#FCFCFA; --surface-2:#E9EBE4; --ink:#171A21; --ink-2:#474D5B; --muted:#6E7482;
-  --line:#DADDD4; --accent:#3531A8; --accent-ink:#FBFBFF; --accent-soft:#E3E2F6; --accent-2:#C9C7F0;
+  --line:#DADDD4; --accent:#3531A8; --accent-ink:#3CFF6E; --head:#171A21; --accent-soft:#E3E2F6; --accent-2:#C9C7F0;
   --crit-ink:#FFFFFF; --good:#1D6B1D; --good-bg:#E1F0DE; --warn:#8A5A00; --warn-bg:#F8EDD3; --crit:#B42828; --crit-bg:#F8E1DF;
   --grid:#E1E0D9; --axis:#B9B8AE;
   --c-food:#2a78d6; --c-groceries:#eb6834; --c-travel:#1baf7a; --c-shopping:#eda100;
@@ -26,7 +26,7 @@
   :root:not([data-theme="light"]){
     color-scheme: dark;
     --bg:#0F1115; --surface:#181B21; --surface-2:#232730; --ink:#EEF0F4; --ink-2:#C3C8D2; --muted:#8F96A3;
-    --line:#2C3139; --accent:#9591F2; --accent-ink:#14142B; --accent-soft:#25254A; --accent-2:#3A3A70;
+    --line:#2C3139; --accent:#9591F2; --accent-ink:#14142B; --head:#3CFF6E; --accent-soft:#25254A; --accent-2:#3A3A70;
     --crit-ink:#2A0D0D; --good:#4CC44C; --good-bg:#16301A; --warn:#F2B53A; --warn-bg:#35290F; --crit:#F27B7B; --crit-bg:#3A1A1A;
     --grid:#2A2D33; --axis:#454A52;
     --c-food:#3987e5; --c-groceries:#d95926; --c-travel:#199e70; --c-shopping:#c98500;
@@ -37,7 +37,7 @@
 :root[data-theme="dark"]{
   color-scheme: dark;
   --bg:#0F1115; --surface:#181B21; --surface-2:#232730; --ink:#EEF0F4; --ink-2:#C3C8D2; --muted:#8F96A3;
-  --line:#2C3139; --accent:#9591F2; --accent-ink:#14142B; --accent-soft:#25254A; --accent-2:#3A3A70;
+  --line:#2C3139; --accent:#9591F2; --accent-ink:#14142B; --head:#3CFF6E; --accent-soft:#25254A; --accent-2:#3A3A70;
   --crit-ink:#2A0D0D; --good:#4CC44C; --good-bg:#16301A; --warn:#F2B53A; --warn-bg:#35290F; --crit:#F27B7B; --crit-bg:#3A1A1A;
   --grid:#2A2D33; --axis:#454A52;
   --c-food:#3987e5; --c-groceries:#d95926; --c-travel:#199e70; --c-shopping:#c98500;
@@ -49,7 +49,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15p
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em;color:var(--head)}
+.safe h1,.safe h2,.safe h3{color:inherit}
+.tile .v,.env .bal:not(.neg),.brand,.mcard h3,.card h3,.alert .h,.eamt,.cbar .amt,.hero-num,.verdict .vh + p b{color:var(--head)}
 p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
@@ -777,7 +779,7 @@ function renderHome(){
 
   <section class="home-sec">
     <p class="eyebrow">What Budgetly does</p>
-    <h2 style="margin-top:8px">Plan with envelopes. Log in seconds. Check before you buy.</h2>
+    <h2 style="margin-top:8px">Plan with envelopes. Add expenses in seconds. Check before you buy.</h2>
     <div class="fgrid">
       <div class="fitem"><span class="k">Snap a bill</span><h3>Bills split item by item</h3><p>AI reads the photo and sorts each line into a category, so one DMart bill becomes groceries, snacks and household. Or just type “chai 20, auto 60”.</p><p class="ex">₹1,654 bill → Groceries ₹1,033 · Food ₹254 · Other ₹367</p></div>
       <div class="fitem"><span class="k">Envelopes & goals</span><h3>Every rupee gets a job</h3><p>Give each category and goal a monthly envelope. Expenses come out automatically, overspending gets covered from another envelope, and leftovers roll into Savings at month end.</p><p class="ex">“Can I afford ₹5,000 shoes?” → Shopping has ₹2,000 · take ₹3,000 from Travel, or delay your Bike by 1 week</p></div>
@@ -909,7 +911,7 @@ function renderToday(){
   <div class="two"><button class="btn primary" data-act="afford">Can I afford this?</button><button class="btn" data-act="tab" data-tab="env">My envelopes</button></div>
 
   <section class="card">
-    <div class="between" style="margin-bottom:10px"><div><p class="eyebrow">${mLong(CUR)} · day ${t} of ${n}</p><p style="font-family:var(--display);font-size:22px;font-weight:700" class="num">${inr(st.total)} <span class="muted" style="font-size:15px;font-family:var(--body);font-weight:500">of ${inr(st.target)}</span></p></div>
+    <div class="between" style="margin-bottom:10px"><div><p class="eyebrow">${mLong(CUR)} · day ${t} of ${n}</p><p style="font-family:var(--display);font-size:22px;font-weight:700" class="num hero-num">${inr(st.total)} <span class="muted" style="font-size:15px;font-family:var(--body);font-weight:500">of ${inr(st.target)}</span></p></div>
     <span class="pill ${st.projected>st.target?'crit':'good'}">${st.projected>st.target?'▲ Over pace':'✓ On track'}</span></div>
     <div class="bar" role="img" aria-label="${inr(st.total)} spent of ${inr(st.target)}; ideal by today ${inr(idealNow)}"><div class="fill ${st.total>st.target?'over':''}" style="width:${pct}%"></div><div class="mark" style="left:calc(${Math.min(100,idealNow/st.target*100)}% - 1px)"></div></div>
     <div class="barlegend"><span>Fixed costs ${inr(st.fx)} · Day-to-day ${inr(st.varSpent)}</span><span>Line = ideal by today</span></div>
@@ -1286,7 +1288,7 @@ function renderEnvelopes(){
   const keys=spendKeys();
   return `
   <section class="card stack" style="gap:10px">
-    <div class="between"><div><p class="eyebrow">Salary this month</p><p style="font-family:var(--display);font-size:24px;font-weight:800" class="num">${inr(sal)}</p></div><span class="pill ${un<-0.5?'crit':'info'}">${un>=-0.5?`Unallocated ${inr(Math.max(0,un))}`:`Over-planned by ${inr(-un)}`}</span></div>
+    <div class="between"><div><p class="eyebrow">Salary this month</p><p style="font-family:var(--display);font-size:24px;font-weight:800" class="num hero-num">${inr(sal)}</p></div><span class="pill ${un<-0.5?'crit':'info'}">${un>=-0.5?`Unallocated ${inr(Math.max(0,un))}`:`Over-planned by ${inr(-un)}`}</span></div>
     <div class="stackbar" aria-hidden="true">${seg(fx,'var(--c-bills)')}${seg(envT,'var(--accent)')}${seg(gs,'var(--good)')}</div>
     <div class="legend" style="margin:0"><span><i class="sw" style="background:var(--c-bills)"></i>Fixed ${inr(fx)}</span><span><i class="sw" style="background:var(--accent)"></i>Envelopes ${inr(envT)}</span><span><i class="sw" style="background:var(--good)"></i>Goals & savings ${inr(gs)}</span></div>
   </section>
