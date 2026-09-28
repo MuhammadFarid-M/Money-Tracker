@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#3531A8">
+<meta name="theme-color" content="#0F1115">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 <title>Budgetly Money Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +43,17 @@
   --c-food:#3987e5; --c-groceries:#d95926; --c-travel:#199e70; --c-shopping:#c98500;
   --c-bills:#d55181; --c-fun:#1f9a1f; --c-health:#9085e9; --c-other:#8a8984;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+/* always dark: same look on every device */
+:root,:root[data-theme="light"],:root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0F1115; --surface:#181B21; --surface-2:#232730; --ink:#EEF0F4; --ink-2:#C3C8D2; --muted:#8F96A3;
+    --line:#2C3139; --accent:#9591F2; --accent-ink:#14142B; --head:#3CFF6E; --accent-soft:#25254A; --accent-2:#3A3A70;
+    --crit-ink:#2A0D0D; --good:#4CC44C; --good-bg:#16301A; --warn:#F2B53A; --warn-bg:#35290F; --crit:#F27B7B; --crit-bg:#3A1A1A;
+    --grid:#2A2D33; --axis:#454A52;
+    --c-food:#3987e5; --c-groceries:#d95926; --c-travel:#199e70; --c-shopping:#c98500;
+    --c-bills:#d55181; --c-fun:#1f9a1f; --c-health:#9085e9; --c-other:#8a8984;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -745,7 +756,8 @@ function renderHome(){
   <header class="home-top"><span class="brand">Budget<span>ly</span></span>${has?`<button class="btn small" data-act="continue">Open my diary</button>`:''}</header>
   <section class="hero">
     <div>
-      <h1>Know where every rupee goes, <em>while there's still time to change it.</em></h1>
+      <p class="eyebrow">Smart envelope budgeting for everyday spending</p>
+      <h1 style="margin-top:10px">Know where every rupee goes, <em>while there's still time to change it.</em></h1>
       <p class="lede">Split your salary into envelopes like Food, Travel and a Bike goal. Snap a bill or type “chai 20, auto 60” and Budgetly takes it out of the right envelope, tells you each morning how much is safe to spend, and answers “Can I afford this?” before you buy.</p>
       <div class="cta">
         <button class="btn primary" data-act="demo">Explore the demo</button>
