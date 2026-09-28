@@ -225,13 +225,15 @@ function parseUpi(raw){
 function buildLink(info,amount){
   // keep the scanned QR untouched; only add what it lacks
   let link=info.raw;
+  if(!info.am)link=link.replace(/([?&])am=(?:0*\.?0*)?(?=&|$)/i,'$1').replace(/&&+/g,'&').replace(/\?&/,'?').replace(/[?&]$/,'');
   if(!info.am)link+=(link.includes('?')?'&':'?')+'am='+amount.toFixed(2);
   if(!info.cu)link+='&cu=INR';
   return link;
 }
-function variants(link){
+function variants(link,info){
   const q=link.slice(link.indexOf('?')+1);
   const v=[{id:'upi',label:'Any UPI app',sub:'Standard upi:// link. Android shows the list of UPI apps.',href:link}];
+  if(info&&!info.am)v.push({id:'as-scanned',label:'Exactly as scanned (no amount added)',sub:'Opens the QR unchanged. Type the same amount in the UPI app.',href:info.raw});
   if(isAndroid){
     v.push({id:'gpay-intent',label:'Google Pay (Android intent)',sub:'Targets GPay directly',href:`intent://pay?${q}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`});
     v.push({id:'phonepe-intent',label:'PhonePe (Android intent)',sub:'Targets PhonePe directly',href:`intent://pay?${q}#Intent;scheme=upi;package=com.phonepe.app;end`});
@@ -475,7 +477,7 @@ function renderPay(){
     <button class="btn primary block" data-act="checkBal">Check balance</button>`;
   }else if(p.step==='confirm'){
     const link=buildLink(p.info,p.amount);
-    const vs=variants(link);
+    const vs=variants(link,p.info);
     const covers=p.covers.filter(c=>c.amount>0);
     body=`<div class="bigcheck ok"><i>✓</i><span>${covers.length>1?'Covered by '+covers.length+' envelopes':'Envelope has enough balance'}</span></div>
     <section class="card stack" style="gap:10px">
@@ -486,10 +488,25 @@ function renderPay(){
     <p class="hint">Your UPI app opens with the payee and amount filled in. Enter your PIN there, then come back here.</p>
     <details><summary>Nothing opened? Try another way</summary><div class="stack" style="margin-top:10px;gap:8px">
       ${vs.slice(1).map(v=>`<a class="opt" href="${esc(v.href)}" data-act="launch" data-variant="${v.id}"><span class="d" style="background:var(--accent)"></span><span><span class="t">${esc(v.label)}</span><br><span class="s">${esc(v.sub)}</span></span><span>›</span></a>`).join('')}
+      <button class="btn block" data-act="appScanner">Pay using my UPI app's own scanner</button>
       <button class="btn block" data-act="simulate">Simulate the payment (demo backup)</button>
     </div></details>
     <details><summary>Payment link being opened</summary><div class="linkbox" style="margin-top:8px">${esc(link)}</div><p class="hint" style="margin-top:6px">The scanned QR is passed through unchanged${p.info.am?'':'; only the amount and currency were added'}${p.info.signed?'. This QR is signed, so nothing else can be changed.':'.'}</p></details>
     <button class="btn ghost block" data-act="cancelPay">Cancel</button>`;
+  }else if(p.step==='manual'){
+    body=`<section class="card stack">
+      <h3 style="font-size:20px">Pay ${inr(p.amount)} with your UPI app's scanner</h3>
+      <div class="steps">
+        <div class="step"><b>1</b><p>Open GPay, PhonePe or Paytm.</p></div>
+        <div class="step"><b>2</b><p>Tap <b>Scan QR</b> and scan the same QR: <b>${esc(p.info.pn)}</b>.</p></div>
+        <div class="step"><b>3</b><p>Pay exactly <b>${inr(p.amount)}</b>, then come back here.</p></div>
+      </div>
+      <p class="hint">Lifafa already checked your envelope. The amount is set aside as pending until you confirm.</p>
+      <button class="btn primary block" data-act="result" data-r="paid">I've paid ${inr(p.amount)}</button>
+      <button class="btn block" data-act="result" data-r="failed">It failed</button>
+      <button class="btn ghost block" data-act="result" data-r="cancel">I didn't pay</button>
+      <div class="field"><label for="appmsg">What did the UPI app say? (optional)</label><input class="input" id="appmsg" placeholder="e.g. “Payment successful”"></div>
+    </section>`;
   }else if(p.step==='return'){
     body=`<section class="card stack">
       <h3 style="font-size:20px">Did the payment of ${inr(p.amount)} to ${esc(p.info.pn)} go through?</h3>
@@ -507,7 +524,7 @@ function renderPay(){
     <button class="btn primary block" data-act="close">Done</button>
     <button class="btn block" data-act="lab">See test results</button>`;
   }
-  return `<div class="sheet">${head(p.step==='scan'?'Scan to pay':p.step==='amount'?'Amount':p.step==='confirm'?'Confirm':p.step==='return'?'Payment result':'Done')}<div class="wrap stack">${body}</div></div>`;
+  return `<div class="sheet">${head(p.step==='scan'?'Scan to pay':p.step==='amount'?'Amount':p.step==='confirm'?'Confirm':p.step==='return'?'Payment result':p.step==='manual'?'Pay in your UPI app':'Done')}<div class="wrap stack">${body}</div></div>`;
 }
 function handleScanned(raw){
   const p=ui.pay;if(!p)return;
@@ -663,7 +680,7 @@ function finishPay(result){
   const p=ui.pay;const msg=($('#appmsg')||{}).value||'';
   const status=result==='paid'?'confirmed':'cancelled';
   S.tx.forEach(t=>{if(t.group===p.txGroup)t.status=status;});
-  if(p.variant!=='simulated')S.tests.push({at:Date.now(),variant:p.variant,opened:!!p.opened,result:{paid:'Paid',failed:'Failed or blocked',noapp:'No app opened',cancel:'Cancelled by user'}[result],pa:p.info.pa,merchant:p.info.merchant,amount:p.amount,msg:msg.slice(0,140),ua:isAndroid?'Android':isIOS?'iOS':'Other'});
+  if(p.variant!=='simulated')S.tests.push({at:Date.now(),variant:p.variant,opened:!!p.opened,result:{paid:'Paid',failed:'Failed or blocked',noapp:'No app opened',cancel:'Cancelled by user'}[result],pa:p.info.pa,merchant:p.info.merchant,amount:p.amount,msg:msg.slice(0,140),qr:String(p.info.raw||'').slice(0,300),ua:isAndroid?'Android':isIOS?'iOS':'Other'});
   save();p.result=result;p.step='done';render();
 }
 
@@ -688,7 +705,7 @@ app.addEventListener('click',async ev=>{
       S.envelopes.forEach(e=>{if(e.monthly>0)S.tx.push({id:nid('t'),env:e.id,amount:e.monthly,type:'alloc',note:'Monthly allocation',status:'confirmed',month:0,at:Date.now()});});
       save();ui.view='dash';render();window.scrollTo(0,0);toast('Envelopes saved');break;}
     case 'env':ui.envId=b.dataset.id;ui.sheet='env';render();break;
-    case 'close':stopScan();if(ui.pay&&ui.pay.step==='return'){toast('Tell us whether the payment went through first');return;}cancelPending();ui.sheet=ui.sheet==='pay'&&ui.envId&&ui.pay&&ui.pay.step==='done'?'env':null;ui.pay=null;ui.modal=null;render();break;
+    case 'close':stopScan();if(ui.pay&&(ui.pay.step==='return'||ui.pay.step==='manual')){toast('Tell us whether the payment went through first');return;}cancelPending();ui.sheet=ui.sheet==='pay'&&ui.envId&&ui.pay&&ui.pay.step==='done'?'env':null;ui.pay=null;ui.modal=null;render();break;
     case 'payFrom':ui.pay=newPay(b.dataset.id);ui.sheet='pay';render();break;
     case 'payAny':ui.pay=newPay(null);ui.envId=null;ui.sheet='pay';render();break;
     case 'camOn':ui.pay.camera=true;ui.pay.camErr='';ui.pay.err='';render();break;
@@ -709,6 +726,7 @@ app.addEventListener('click',async ev=>{
       p.covers=covers;ui.modal=null;p.step='confirm';render();break;}
     case 'coverCancel':ui.modal=null;render();toast('Good call. Nothing was paid.');break;
     case 'launch':launch(b.dataset.variant);break; // the link itself navigates
+    case 'appScanner':{const p=ui.pay;launch('app-scanner');clearTimeout(p.noAppTimer);p.opened=true;p.step='manual';render();break;}
     case 'simulate':{const p=ui.pay;launch('simulated');clearTimeout(p.noAppTimer);p.opened=true;p.step='return';render();break;}
     case 'cancelPay':cancelPending();ui.pay=null;ui.sheet=ui.envId?'env':null;render();break;
     case 'result':finishPay(b.dataset.r);break;
@@ -732,7 +750,7 @@ app.addEventListener('click',async ev=>{
       if(info.error||!/^[\w.\-]{2,}@[a-z]{2,}$/i.test(pa)){toast('Enter a valid UPI ID, like name@okaxis');return;}
       const first=S.envelopes.find(x=>x.type==='spend');ui.pay=Object.assign(newPay(first&&first.id),{info,amount:1,step:'confirm',covers:[{env:first.id,amount:1}]});ui.sheet='pay';render();break;}
     case 'labQR':showTestQR();break;
-    case 'copyLog':{const lines=['When\tPhone\tMethod\tApp opened\tResult\tPayee\tMerchant QR\tApp message'].concat(S.tests.map(t=>[new Date(t.at).toLocaleString('en-IN'),t.ua,t.variant,t.opened?'Yes':'No',t.result,t.pa,t.merchant?'Yes':'No',t.msg||''].join('\t')));const txt=lines.join('\n');
+    case 'copyLog':{const lines=['When\tPhone\tMethod\tApp opened\tResult\tPayee\tMerchant QR\tApp message\tQR contents'].concat(S.tests.map(t=>[new Date(t.at).toLocaleString('en-IN'),t.ua,t.variant,t.opened?'Yes':'No',t.result,t.pa,t.merchant?'Yes':'No',t.msg||'',t.qr||''].join('\t')));const txt=lines.join('\n');
       try{await navigator.clipboard.writeText(txt);toast('Results copied');}catch(e){const ta=$('#logtext');ta.hidden=false;ta.value=txt;ta.select();toast('Select and copy the text below');}break;}
     case 'clearLog':S.tests=[];save();render();break;
   }
