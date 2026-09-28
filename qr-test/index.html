@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B6B55">
+<title>Lifafa · Envelope Pay Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#EDF1EE; --surface:#FBFCFB; --surface-2:#E1E8E3; --ink:#12201B; --ink-2:#3E4E47; --muted:#66766F;
+  --line:#D2DBD5; --accent:#0B6B55; --accent-ink:#F4FBF8; --accent-soft:#D3EAE1; --gold:#9A6512; --gold-soft:#F6EAD2;
+  --good:#1D6B1D; --good-bg:#DFF0DC; --crit:#B42828; --crit-bg:#F8E1DF; --crit-ink:#FFFFFF;
+  --display:"Outfit","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Nunito Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow:0 1px 2px rgba(18,32,27,.06),0 10px 28px rgba(18,32,27,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#0C1311; --surface:#141D1A; --surface-2:#1E2926; --ink:#E9F1ED; --ink-2:#BFCDC7; --muted:#8A9A93;
+    --line:#26332E; --accent:#4FC7A3; --accent-ink:#06201A; --accent-soft:#16352C; --gold:#E3B45C; --gold-soft:#33280F;
+    --good:#58C858; --good-bg:#14301A; --crit:#F27B7B; --crit-bg:#3A1A1A; --crit-ink:#2A0D0D;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.ink2{color:var(--ink-2)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;align-items:center;gap:8px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:14px 120px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 18px;font-weight:700;min-height:46px;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.block{width:100%}
+.btn.small{min-height:36px;padding:6px 12px;font-size:14px;border-radius:10px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.danger{color:var(--crit);border-color:var(--crit-bg)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.gold{background:var(--gold-soft);color:var(--gold)}
+.pill.info{background:var(--accent-soft);color:var(--accent)}
+.hint{font-size:14px;color:var(--muted)}
+.err{color:var(--crit);font-weight:700;font-size:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.flabel{font-size:14px;font-weight:700;color:var(--ink-2)}
+.input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px}
+.input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+textarea.input{min-height:80px;resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.brand{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em}
+.brand span{color:var(--accent)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:4px 16px}
+.iconbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-size:20px}
+
+/* home */
+.hero h1{font-size:clamp(32px,8vw,46px);font-weight:800;line-height:1.04;letter-spacing:-.03em;margin-top:8px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{color:var(--ink-2);font-size:17px;margin-top:12px}
+.steps{display:grid;gap:10px;margin-top:6px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step b{display:inline-flex;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);align-items:center;justify-content:center;font-family:var(--display)}
+.warnbox{background:var(--gold-soft);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:14px}
+.warnbox b{color:var(--gold)}
+
+/* envelopes */
+.total{background:var(--accent);color:var(--accent-ink);border-radius:20px;padding:18px 18px 16px}
+.total .big{font-family:var(--display);font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.total .sub{opacity:.9;font-size:14px}
+.envgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:360px){.envgrid{grid-template-columns:1fr}}
+.env{position:relative;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 14px 14px;overflow:hidden;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.env::before{content:"";position:absolute;left:0;right:0;top:0;height:22px;background:var(--ec);opacity:.9;clip-path:polygon(0 0,100% 0,50% 100%)}
+.env .nm{font-family:var(--display);font-weight:700;font-size:17px;line-height:1.2}
+.env .bal{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em}
+.env .meta{font-size:13px;color:var(--muted)}
+.meter{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-top:auto}
+.meter i{display:block;height:100%;border-radius:999px;background:var(--ec)}
+.env .lock{position:absolute;top:28px;right:12px;font-size:12px;font-weight:700;color:var(--muted)}
+.tx{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tx:last-child{border-bottom:0}
+.tx .a{font-weight:700;text-align:right}
+.tx .a.neg{color:var(--ink)}
+.tx .a.pos{color:var(--good)}
+.tx .s{font-size:13px;color:var(--muted)}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto}
+.sheethead{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}
+.sheethead .in{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px}
+.sheethead h2{font-size:19px;flex:1;min-width:0}
+.sheet .wrap{padding-block:16px 60px}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,18,15,.55);display:flex;align-items:flex-end;justify-content:center}
+.modal .box{background:var(--bg);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow-y:auto}
+
+/* scanner */
+.viewfinder{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:1/1;max-width:100%}
+.viewfinder video{width:100%;height:100%;object-fit:cover;display:block}
+.viewfinder .frame{position:absolute;inset:14%;border:3px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.viewfinder .msg{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--muted);font-weight:700}
+.kv dd{margin:0;word-break:break-all}
+.amt{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px 16px}
+.amt span{font-family:var(--display);font-size:34px;font-weight:700;color:var(--muted)}
+.amt input{border:0;background:none;font-family:var(--display);font-size:40px;font-weight:800;width:100%;min-width:0;outline:none}
+.amt:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.amt.locked{background:var(--surface-2)}
+.bigcheck{display:flex;gap:12px;align-items:center;border-radius:16px;padding:14px;font-weight:700}
+.bigcheck.ok{background:var(--good-bg);color:var(--good)}
+.bigcheck.no{background:var(--crit-bg);color:var(--crit)}
+.bigcheck i{font-style:normal;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:var(--surface)}
+.flow{display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-weight:700;font-size:20px}
+.opt{color:var(--ink);text-decoration:none;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;text-align:left;width:100%}
+.opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opt .d{width:12px;height:12px;border-radius:50%}
+.opt .t{font-weight:700}
+.opt .s{font-size:13px;color:var(--muted)}
+.opt[disabled]{opacity:.55}
+.linkbox{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--surface-2);border-radius:10px;padding:10px;word-break:break-all;color:var(--ink-2)}
+details{border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:var(--surface)}
+details summary{font-weight:700;cursor:pointer}
+.checks{display:grid;gap:8px}
+.check{display:flex;justify-content:space-between;gap:12px;font-size:15px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.check:last-child{border-bottom:0}
+.ok{color:var(--good);font-weight:800}
+.bad{color:var(--crit);font-weight:800}
+.qrbox{display:flex;justify-content:center;background:#fff;border-radius:14px;padding:14px}
+.qrbox img,.qrbox svg{width:220px;height:220px;image-rendering:pixelated}
+table.log{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.log th,table.log td{text-align:left;border-bottom:1px solid var(--line);padding:8px 6px;vertical-align:top}
+.scrollx{overflow-x:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:70;max-width:calc(100% - 32px);text-align:center}
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.radios label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" hidden></div>
+<script>
+(function(){
+'use strict';
+/* ---------------- helpers ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>(n<0?'−':'')+'₹'+(Math.round(Math.abs(n)*100)/100).toLocaleString('en-IN',{maximumFractionDigits:2});
+const sum=a=>a.reduce((x,y)=>x+(+y||0),0);
+const COLORS=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#4a3aa7','#008300','#e34948'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+let uid=Date.now()%1e6;const nid=p=>(p||'x')+(uid++).toString(36);
+const KEY='lifafa.proto.v1';
+const isAndroid=/Android/i.test(navigator.userAgent);
+const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2800);}
+
+/* ---------------- state ---------------- */
+let S=null;
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.envelopes))S=v;}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function monthLabel(i){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+i);return MONTHS[d.getMonth()]+' '+d.getFullYear();}
+function seed(){
+  const env=(name,type,monthly,extra)=>Object.assign({id:nid('env'),name,type,monthly,color:null},extra||{});
+  const envs=[env('Food','spend',8000),env('Travel','spend',3000),env('Shopping','spend',3000),env('Rent & bills','spend',17000),env('Bike','goal',10000,{target:200000}),env('Savings','savings',7000)];
+  envs.forEach((e,i)=>e.color=COLORS[i%COLORS.length]);
+  const s={income:50000,monthIndex:0,envelopes:envs,tx:[],tests:[],demo:true};
+  const add=(env,amount,type,note,payee)=>s.tx.push({id:nid('t'),env:env.id,amount,type,note,payee:payee||'',status:'confirmed',month:0,at:Date.now()});
+  // previous months' goal & savings build-up
+  add(envs[4],54000,'carry','Saved in earlier months');
+  add(envs[5],15000,'carry','Saved in earlier months');
+  envs.forEach(e=>add(e,e.monthly,'alloc','Monthly allocation'));
+  add(envs[0],-180,'spend','Blue Tokai Coffee','bluetokai@okaxis');add(envs[0],-640,'spend','Swiggy','swiggy@icici');add(envs[0],-1240,'spend','DMart','dmart@hdfcbank');add(envs[0],-95,'spend','Chai stall','raju.tea@ybl');
+  add(envs[1],-60,'spend','Auto','auto.driver@paytm');add(envs[1],-500,'spend','Metro recharge','dmrc@sbi');
+  add(envs[2],-1000,'spend','Zudio','zudio@axisbank');
+  add(envs[3],-15000,'spend','House rent','landlord@okicici');
+  return s;
+}
+function envById(id){return S.envelopes.find(e=>e.id===id);}
+function balance(id){return sum(S.tx.filter(t=>t.env===id&&t.status==='confirmed').map(t=>t.amount));}
+function pending(id){return -sum(S.tx.filter(t=>t.env===id&&t.status==='pending').map(t=>t.amount));}
+function allocatedThisMonth(){return sum(S.tx.filter(t=>t.type==='alloc'&&t.month===S.monthIndex).map(t=>t.amount));}
+function unallocated(){return S.income-allocatedThisMonth()+sum(S.tx.filter(t=>t.type==='unalloc'&&t.month===S.monthIndex).map(t=>t.amount));}
+function spentThisMonth(id){return -sum(S.tx.filter(t=>t.env===id&&t.type==='spend'&&t.status==='confirmed'&&t.month===S.monthIndex).map(t=>t.amount));}
+function available(id){return balance(id)-pending(id);}
+
+/* ---------------- UPI parsing ---------------- */
+function parseUpi(raw){
+  const text=String(raw||'').trim();
+  if(!/^upi:\/\/pay\?/i.test(text)){
+    if(/^https?:\/\//i.test(text))return {error:'This QR is a website link, not a UPI payment QR.'};
+    if(/^[\w.\-]{2,}@[a-z]{2,}$/i.test(text))return parseUpi('upi://pay?pa='+text+'&pn='+encodeURIComponent(text));
+    return {error:'This isn’t a UPI payment QR.'};
+  }
+  const q=text.slice(text.indexOf('?')+1);
+  const p=new URLSearchParams(q);
+  const pa=p.get('pa');
+  if(!pa)return {error:'This UPI QR has no payee ID (pa).'};
+  const am=p.get('am');
+  const params={};p.forEach((v,k)=>{params[k]=v;});
+  return {raw:text,pa,pn:p.get('pn')||pa,am:am&&+am>0?+am:null,cu:p.get('cu'),mc:p.get('mc'),tr:p.get('tr'),signed:p.has('sign'),merchant:!!(p.get('mc')&&p.get('mc')!=='0000'),params};
+}
+function buildLink(info,amount){
+  // keep the scanned QR untouched; only add what it lacks
+  let link=info.raw;
+  if(!info.am)link=link.replace(/([?&])am=(?:0*\.?0*)?(?=&|$)/i,'$1').replace(/&&+/g,'&').replace(/\?&/,'?').replace(/[?&]$/,'');
+  if(!info.am)link+=(link.includes('?')?'&':'?')+'am='+amount.toFixed(2);
+  if(!info.cu)link+='&cu=INR';
+  return link;
+}
+function variants(link,info){
+  const q=link.slice(link.indexOf('?')+1);
+  const v=[{id:'upi',label:'Any UPI app',sub:'Standard upi:// link. Android shows the list of UPI apps.',href:link}];
+  if(info&&!info.am)v.push({id:'as-scanned',label:'Exactly as scanned (no amount added)',sub:'Opens the QR unchanged. Type the same amount in the UPI app.',href:info.raw});
+  if(isAndroid){
+    v.push({id:'gpay-intent',label:'Google Pay (Android intent)',sub:'Targets GPay directly',href:`intent://pay?${q}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`});
+    v.push({id:'phonepe-intent',label:'PhonePe (Android intent)',sub:'Targets PhonePe directly',href:`intent://pay?${q}#Intent;scheme=upi;package=com.phonepe.app;end`});
+    v.push({id:'paytm-intent',label:'Paytm (Android intent)',sub:'Targets Paytm directly',href:`intent://pay?${q}#Intent;scheme=upi;package=net.one97.paytm;end`});
+  }
+  v.push({id:'gpay-scheme',label:'Google Pay (tez:// link)',sub:'App-specific link, may not work everywhere',href:'tez://upi/pay?'+q});
+  v.push({id:'phonepe-scheme',label:'PhonePe (phonepe:// link)',sub:'App-specific link, may not work everywhere',href:'phonepe://pay?'+q});
+  v.push({id:'paytm-scheme',label:'Paytm (paytmmp:// link)',sub:'App-specific link, may not work everywhere',href:'paytmmp://pay?'+q});
+  return v;
+}
+
+/* ---------------- QR decoding ---------------- */
+let detector=null,detectorChecked=false;
+async function getDetector(){
+  if(detectorChecked)return detector;detectorChecked=true;
+  try{if('BarcodeDetector' in window){const f=await window.BarcodeDetector.getSupportedFormats();if(f.includes('qr_code'))detector=new window.BarcodeDetector({formats:['qr_code']});}}catch(e){detector=null;}
+  return detector;
+}
+const cvs=document.createElement('canvas');const ctx=cvs.getContext('2d',{willReadFrequently:true});
+async function decodeSource(src,w,h){
+  const det=await getDetector();
+  if(det){try{const r=await det.detect(src);if(r&&r[0])return r[0].rawValue;}catch(e){}}
+  if(window.jsQR){
+    const sc=Math.min(1,900/Math.max(w,h));cvs.width=Math.round(w*sc);cvs.height=Math.round(h*sc);
+    ctx.drawImage(src,0,0,cvs.width,cvs.height);
+    const d=ctx.getImageData(0,0,cvs.width,cvs.height);const r=window.jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});
+    if(r)return r.data;
+  }
+  return null;
+}
+let stream=null,scanTimer=null;
+function stopScan(){if(scanTimer){clearTimeout(scanTimer);scanTimer=null;}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+async function startScan(onFound,onError){
+  stopScan();
+  if(!window.isSecureContext)return onError('The camera only works on an HTTPS page. Host this file on Netlify, Vercel or GitHub Pages and open that link.');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return onError('This browser can’t open the camera. Use “Upload QR image” instead.');
+  const video=$('#video');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  }catch(e){
+    const n=e&&e.name;
+    return onError(n==='NotAllowedError'?'Camera permission was denied. Allow camera access for this site in Chrome’s site settings, then try again.':n==='NotFoundError'?'No camera found on this device.':'Could not start the camera ('+(n||'error')+').');
+  }
+  if(!video){stopScan();return;}
+  video.srcObject=stream;video.setAttribute('playsinline','');video.muted=true;
+  try{await video.play();}catch(e){}
+  const tick=async()=>{
+    if(!stream)return;
+    if(video.readyState>=2&&video.videoWidth){
+      const val=await decodeSource(video,video.videoWidth,video.videoHeight);
+      if(val&&stream){stopScan();onFound(val);return;}
+    }
+    scanTimer=setTimeout(tick,180);
+  };
+  tick();
+}
+async function decodeFile(file){
+  try{
+    const bmp=await createImageBitmap(file);
+    return await decodeSource(bmp,bmp.width,bmp.height);
+  }catch(e){
+    return await new Promise(res=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=async()=>{const v=await decodeSource(img,img.naturalWidth,img.naturalHeight);URL.revokeObjectURL(u);res(v);};img.onerror=()=>{URL.revokeObjectURL(u);res(null);};img.src=u;});
+  }
+}
+
+/* ---------------- UI state ---------------- */
+const ui={view:'home',sheet:null,pay:null,modal:null,tab:'env'};
+const app=$('#app');
+
+function render(){
+  let h='';
+  if(ui.view==='home')h=renderHome();
+  else if(ui.view==='setup')h=renderSetup();
+  else h=renderDash();
+  if(ui.sheet)h+=renderSheet();
+  if(ui.modal)h+=renderModal();
+  app.innerHTML=h;
+  document.body.style.overflow=(ui.sheet||ui.modal)?'hidden':'';
+  afterRender();
+}
+function afterRender(){
+  const f=$('#qrfile');if(f)f.addEventListener('change',onQrFile);
+  const pf=$('#pasteform');if(pf)pf.addEventListener('submit',e=>{e.preventDefault();const v=$('#pastein').value;handleScanned(v);});
+  if(ui.sheet==='pay'&&ui.pay&&ui.pay.step==='scan'&&ui.pay.camera&&!stream){startScan(v=>handleScanned(v),msg=>{ui.pay.camErr=msg;ui.pay.camera=false;render();});}
+  if(ui.sheet==='lab')drawTestQR();
+  const amt=$('#payamt');if(amt&&!amt.readOnly)setTimeout(()=>amt.focus(),60);
+}
+
+/* ---------------- home ---------------- */
+function renderHome(){
+  return `<div class="wrap" style="padding-bottom:48px">
+  <div class="top"><span class="brand">Lifa<span>fa</span></span><span class="pill info">Prototype</span></div>
+  <section class="hero stack">
+    <p class="eyebrow">Envelope budgeting, built into UPI payments</p>
+    <h1>Every rupee gets an envelope. <em>Every payment checks it first.</em></h1>
+    <p class="lede">Split your salary into envelopes like Food, Travel and a Bike goal. Pay by scanning a shop's QR from inside an envelope. If the envelope is short, Lifafa stops you before your UPI app opens.</p>
+  </section>
+  <div class="stack" style="margin-top:22px">
+    ${S?`<button class="btn primary block" data-act="open">Open my envelopes</button>`:`<button class="btn primary block" data-act="demo">Try the demo envelopes</button>`}
+    <button class="btn block" data-act="setup">${S?'Change income and envelopes':'Set up my own envelopes'}</button>
+    <button class="btn block" data-act="lab">Open the UPI test lab</button>
+  </div>
+  <section class="card stack" style="margin-top:22px">
+    <h3 style="font-size:19px">How paying works</h3>
+    <div class="steps">
+      <div class="step"><b>1</b><p>Open an envelope and tap <b>Make a payment</b>.</p></div>
+      <div class="step"><b>2</b><p>Scan the shop's UPI QR. Lifafa reads the payee and, if the QR has one, the amount.</p></div>
+      <div class="step"><b>3</b><p>Enter the amount. Lifafa checks the envelope's balance.</p></div>
+      <div class="step"><b>4</b><p>Enough money: tap <b>Pay with UPI app</b> and GPay or PhonePe opens with everything filled in. Not enough: pick another envelope to cover the gap, or cancel.</p></div>
+      <div class="step"><b>5</b><p>Come back and confirm. The amount leaves the envelope.</p></div>
+    </div>
+  </section>
+  <div class="warnbox" style="margin-top:16px"><b>Real money moves.</b> Payments open your real UPI app. Test with ₹1 to a friend or your own business QR. Envelope balances are only a plan on this phone; they aren't bank accounts.</div>
+  </div>`;
+}
+
+/* ---------------- setup ---------------- */
+function renderSetup(){
+  const d=ui.draft;
+  const tot=sum(d.envelopes.map(e=>+e.monthly||0));
+  return `<div class="wrap" style="padding-bottom:48px">
+  <div class="top"><span class="brand">Lifa<span>fa</span></span><button class="btn small ghost" data-act="home">Back</button></div>
+  <h1 style="font-size:28px">Your envelopes</h1>
+  <p class="ink2" style="margin:6px 0 18px">Set your monthly income and how much goes into each envelope.</p>
+  <div class="stack">
+    <div class="field"><label for="st-income">Monthly income (₹)</label><input class="input num" id="st-income" type="number" inputmode="numeric" min="0" value="${esc(d.income)}"></div>
+    ${d.envelopes.map((e,i)=>`<div class="card stack" style="gap:10px">
+      <div class="between"><span class="flabel">Envelope ${i+1}</span><button class="btn small ghost" data-act="envdel" data-i="${i}">Remove</button></div>
+      <input class="input" id="st-name-${i}" aria-label="Envelope name" value="${esc(e.name)}" placeholder="e.g. Food">
+      <div class="row"><input class="input num" id="st-mon-${i}" aria-label="Monthly amount" type="number" inputmode="numeric" min="0" value="${esc(e.monthly)}" placeholder="Monthly ₹">
+      <select class="input" id="st-type-${i}" aria-label="Type"><option value="spend" ${e.type==='spend'?'selected':''}>Spending</option><option value="goal" ${e.type==='goal'?'selected':''}>Goal</option><option value="savings" ${e.type==='savings'?'selected':''}>Savings (locked)</option></select></div>
+      <input class="input num" id="st-tgt-${i}" aria-label="Goal target" type="number" inputmode="numeric" min="0" value="${esc(e.target||'')}" placeholder="Goal target ₹ (goals only)">
+    </div>`).join('')}
+    <button class="btn" data-act="envadd">+ Add envelope</button>
+    <p class="hint">Allocated ${inr(tot)} of ${inr(+d.income||0)}. ${(+d.income||0)-tot>=0?`${inr((+d.income||0)-tot)} stays unallocated.`:`That's ${inr(tot-(+d.income||0))} more than your income.`}</p>
+    ${ui.setupErr?`<p class="err" role="alert">${esc(ui.setupErr)}</p>`:''}
+    <button class="btn primary block" data-act="setupSave">Save envelopes</button>
+    ${S?'<p class="hint">Saving starts a fresh month with these envelopes. Earlier transactions are cleared.</p>':''}
+  </div></div>`;
+}
+function readSetup(){
+  const d=ui.draft;d.income=+$('#st-income').value||0;
+  d.envelopes=d.envelopes.map((e,i)=>({...e,name:$('#st-name-'+i).value.trim(),monthly:+$('#st-mon-'+i).value||0,type:$('#st-type-'+i).value,target:+$('#st-tgt-'+i).value||0}));
+}
+
+/* ---------------- dashboard ---------------- */
+function envCard(e){
+  const bal=balance(e.id),pen=pending(e.id);
+  let meter=0,meta='';
+  if(e.type==='goal'){meter=Math.min(100,bal/(e.target||1)*100);meta=`${Math.round(meter)}% of ${inr(e.target)}`;}
+  else if(e.type==='savings'){meter=100;meta='Locked · move money out to spend';}
+  else{const spent=spentThisMonth(e.id);const base=Math.max(1,bal+spent);meter=Math.max(0,Math.min(100,bal/base*100));meta=`${inr(spent)} spent of ${inr(base)}`;}
+  return `<button class="env" style="--ec:${e.color}" data-act="env" data-id="${e.id}">
+    ${e.type==='savings'?'<span class="lock">LOCKED</span>':''}
+    <span class="nm">${esc(e.name)}</span>
+    <span class="bal num">${inr(bal)}</span>
+    <span class="meta">${meta}${pen>0?` · ${inr(pen)} pending`:''}</span>
+    <span class="meter"><i style="width:${meter}%"></i></span>
+  </button>`;
+}
+function renderDash(){
+  const total=sum(S.envelopes.map(e=>balance(e.id)));
+  const un=unallocated();
+  return `<div class="wrap">
+  <div class="top"><span class="brand">Lifa<span>fa</span></span><div class="row"><button class="btn small" data-act="lab">Test lab</button><button class="iconbtn" data-act="home" aria-label="Home">⌂</button></div></div>
+  <section class="total stack" style="gap:4px">
+    <span class="eyebrow" style="color:inherit;opacity:.8">${monthLabel(S.monthIndex)} · in envelopes</span>
+    <span class="big num">${inr(total)}</span>
+    <span class="sub">Income ${inr(S.income)} · Unallocated ${inr(un)}</span>
+  </section>
+  <div class="between" style="margin-top:18px"><h2 style="font-size:20px">Envelopes</h2><button class="btn small ghost" data-act="setup">Edit</button></div>
+  <div class="envgrid" style="margin-top:10px">${S.envelopes.map(envCard).join('')}</div>
+  <section class="card" style="margin-top:16px"><div class="between" style="margin-bottom:6px"><h3 style="font-size:17px">Recent activity</h3></div>
+    ${txList(S.tx.slice().reverse().filter(t=>t.type==='spend'||t.type==='transfer').slice(0,8),true)}
+  </section>
+  </div>
+  <div class="bar"><div class="in">
+    <button class="btn primary" data-act="payAny">Scan & pay</button>
+    <button class="btn" data-act="move">Move money</button>
+    <button class="btn" data-act="monthend">Month end</button>
+  </div></div>`;
+}
+function txList(list,showEnv){
+  if(!list.length)return '<p class="hint">Nothing yet.</p>';
+  return list.map(t=>{const e=envById(t.env);return `<div class="tx"><span><b>${esc(t.note)}</b>${t.status==='pending'?' <span class="pill gold">Pending</span>':t.status==='cancelled'?' <span class="pill crit">Cancelled</span>':''}</span><span class="a num ${t.amount>0?'pos':'neg'}">${t.amount>0?'+':''}${inr(t.amount)}</span><span class="s">${showEnv&&e?esc(e.name)+' · ':''}${esc(t.payee||t.type)}</span><span></span></div>`;}).join('');
+}
+
+/* ---------------- sheets ---------------- */
+function head(title){return `<div class="sheethead"><div class="in"><button class="iconbtn" data-act="close" aria-label="Back">‹</button><h2>${title}</h2></div></div>`;}
+function renderSheet(){
+  if(ui.sheet==='env')return renderEnv();
+  if(ui.sheet==='pay')return renderPay();
+  if(ui.sheet==='move')return renderMove();
+  if(ui.sheet==='monthend')return renderMonthEnd();
+  if(ui.sheet==='lab')return renderLab();
+  return '';
+}
+function renderEnv(){
+  const e=envById(ui.envId);if(!e)return '';
+  const bal=balance(e.id);
+  const list=S.tx.filter(t=>t.env===e.id).slice().reverse();
+  let extra='';
+  if(e.type==='goal'){const left=Math.max(0,e.target-bal);const months=e.monthly>0?Math.ceil(left/e.monthly):null;extra=`<p class="ink2">${left>0?`${inr(left)} to go${months?`, about ${months} ${months===1?'month':'months'} at ${inr(e.monthly)}/month`:''}.`:'Goal reached. You can pay from this envelope now.'}</p>`;}
+  if(e.type==='savings')extra='<p class="ink2">Savings are locked. To spend them, move money into another envelope first.</p>';
+  return `<div class="sheet">${head(esc(e.name))}<div class="wrap stack">
+    <section class="total stack" style="gap:4px;border-top:10px solid ${e.color}"><span class="eyebrow" style="color:inherit;opacity:.85">Available</span><span class="big num">${inr(available(e.id))}</span><span class="sub">${pending(e.id)>0?`${inr(pending(e.id))} waiting for confirmation · `:''}${inr(e.monthly)} added monthly</span></section>
+    ${extra}
+    ${e.type==='savings'?'':`<button class="btn primary block" data-act="payFrom" data-id="${e.id}">Make a payment</button>`}
+    <button class="btn block" data-act="move" data-to="${e.id}">Move money in</button>
+    <section class="card"><h3 style="font-size:17px;margin-bottom:6px">History</h3>${txList(list,false)}</section>
+  </div></div>`;
+}
+
+/* ---- pay flow ---- */
+function newPay(envId){return {step:'scan',envId:envId||null,camera:true,camErr:'',info:null,err:'',amount:null,covers:[],txGroup:null,variant:null,opened:false};}
+function renderPay(){
+  const p=ui.pay;const e=p.envId?envById(p.envId):null;
+  let body='';
+  if(p.step==='scan'){
+    body=`${e?`<p class="ink2">Paying from <b>${esc(e.name)}</b> · ${inr(available(e.id))} available</p>`:'<p class="ink2">Scan first, then choose the envelope.</p>'}
+    ${p.camera?`<div class="viewfinder"><video id="video" playsinline muted></video><div class="frame"></div><div class="msg">Point at a UPI QR code</div></div>`:''}
+    ${p.camErr?`<p class="err" role="alert">${esc(p.camErr)}</p>`:''}
+    ${!p.camera?`<button class="btn primary block" data-act="camOn">Open camera</button>`:''}
+    <label class="btn block" for="qrfile">Upload QR image<input id="qrfile" type="file" accept="image/*" hidden></label>
+    ${p.err?`<p class="err" role="alert">${esc(p.err)}</p>`:''}
+    <details><summary>Paste a UPI link or UPI ID instead</summary>
+      <form id="pasteform" class="stack" style="margin-top:10px"><textarea class="input" id="pastein" placeholder="upi://pay?pa=name@okaxis&pn=Name   or   name@okaxis"></textarea><button class="btn" type="submit">Use this</button></form>
+    </details>`;
+  }else if(p.step==='amount'){
+    const i=p.info;
+    body=`<section class="card stack" style="gap:8px">
+      <div class="between"><div><p class="eyebrow">Paying</p><p style="font-family:var(--display);font-weight:700;font-size:21px">${esc(i.pn)}</p><p class="hint" style="word-break:break-all">${esc(i.pa)}</p></div>${i.merchant?'<span class="pill good">✓ Merchant QR</span>':'<span class="pill gold">Personal UPI ID</span>'}</div>
+      ${!i.merchant?'<p class="hint">Some UPI apps block or warn on link payments to personal UPI IDs. A shop’s merchant QR works best.</p>':''}
+      <details><summary>What the QR contains</summary><dl class="kv" style="margin-top:8px">${Object.entries(i.params).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></details>
+    </section>
+    <div class="field"><label for="payamt">Amount${i.am?' (set by the shop’s QR)':''}</label><div class="amt ${i.am?'locked':''}"><span>₹</span><input id="payamt" type="number" inputmode="decimal" min="1" step="0.01" value="${i.am?i.am:(p.amount||'')}" ${i.am?'readonly':''} placeholder="1"></div></div>
+    <div class="stack" style="gap:8px"><span class="flabel">From envelope</span>
+      ${S.envelopes.filter(x=>x.type!=='savings').map(x=>`<button class="opt" data-act="pickEnv" data-id="${x.id}" aria-pressed="${p.envId===x.id}"><i class="d" style="background:${x.color}"></i><span><span class="t">${esc(x.name)}</span><br><span class="s num">${inr(available(x.id))} available</span></span><span>${p.envId===x.id?'✓':''}</span></button>`).join('')}
+    </div>
+    ${p.err?`<p class="err" role="alert">${esc(p.err)}</p>`:''}
+    <button class="btn primary block" data-act="checkBal">Check balance</button>`;
+  }else if(p.step==='confirm'){
+    const link=buildLink(p.info,p.amount);
+    const vs=variants(link,p.info);
+    const covers=p.covers.filter(c=>c.amount>0);
+    body=`<div class="bigcheck ok"><i>✓</i><span>${covers.length>1?'Covered by '+covers.length+' envelopes':'Envelope has enough balance'}</span></div>
+    <section class="card stack" style="gap:10px">
+      <div class="flow"><span>Pay ${inr(p.amount)}</span><span class="muted" style="font-size:15px;font-weight:600">to ${esc(p.info.pn)}</span></div>
+      ${covers.map(c=>{const x=envById(c.env);const b=available(x.id);return `<div class="between num"><span class="row"><i class="d" style="width:10px;height:10px;border-radius:50%;background:${x.color};display:inline-block"></i>${esc(x.name)}</span><span>${inr(b)} → <b>${inr(b-c.amount)}</b></span></div>`;}).join('')}
+    </section>
+    <a class="btn primary block" href="${esc(vs[0].href)}" data-act="launch" data-variant="${vs[0].id}">Pay with UPI app</a>
+    <p class="hint">Your UPI app opens with the payee and amount filled in. Enter your PIN there, then come back here.</p>
+    <details><summary>Nothing opened? Try another way</summary><div class="stack" style="margin-top:10px;gap:8px">
+      ${vs.slice(1).map(v=>`<a class="opt" href="${esc(v.href)}" data-act="launch" data-variant="${v.id}"><span class="d" style="background:var(--accent)"></span><span><span class="t">${esc(v.label)}</span><br><span class="s">${esc(v.sub)}</span></span><span>›</span></a>`).join('')}
+      <button class="btn block" data-act="appScanner">Pay using my UPI app's own scanner</button>
+      <button class="btn block" data-act="simulate">Simulate the payment (demo backup)</button>
+    </div></details>
+    <details><summary>Payment link being opened</summary><div class="linkbox" style="margin-top:8px">${esc(link)}</div><p class="hint" style="margin-top:6px">The scanned QR is passed through unchanged${p.info.am?'':'; only the amount and currency were added'}${p.info.signed?'. This QR is signed, so nothing else can be changed.':'.'}</p></details>
+    <button class="btn ghost block" data-act="cancelPay">Cancel</button>`;
+  }else if(p.step==='manual'){
+    body=`<section class="card stack">
+      <h3 style="font-size:20px">Pay ${inr(p.amount)} with your UPI app's scanner</h3>
+      <div class="steps">
+        <div class="step"><b>1</b><p>Open GPay, PhonePe or Paytm.</p></div>
+        <div class="step"><b>2</b><p>Tap <b>Scan QR</b> and scan the same QR: <b>${esc(p.info.pn)}</b>.</p></div>
+        <div class="step"><b>3</b><p>Pay exactly <b>${inr(p.amount)}</b>, then come back here.</p></div>
+      </div>
+      <p class="hint">Lifafa already checked your envelope. The amount is set aside as pending until you confirm.</p>
+      <button class="btn primary block" data-act="result" data-r="paid">I've paid ${inr(p.amount)}</button>
+      <button class="btn block" data-act="result" data-r="failed">It failed</button>
+      <button class="btn ghost block" data-act="result" data-r="cancel">I didn't pay</button>
+      <div class="field"><label for="appmsg">What did the UPI app say? (optional)</label><input class="input" id="appmsg" placeholder="e.g. “Payment successful”"></div>
+    </section>`;
+  }else if(p.step==='return'){
+    body=`<section class="card stack">
+      <h3 style="font-size:20px">Did the payment of ${inr(p.amount)} to ${esc(p.info.pn)} go through?</h3>
+      <p class="hint">${p.opened?'Your UPI app opened. Answer from what it showed you.':'If no UPI app appeared, choose “No UPI app opened” and try another way from the confirm screen.'}</p>
+      <button class="btn primary block" data-act="result" data-r="paid">Yes, it was paid</button>
+      <button class="btn block" data-act="result" data-r="failed">It failed or was blocked</button>
+      <button class="btn block" data-act="result" data-r="noapp">No UPI app opened</button>
+      <button class="btn ghost block" data-act="result" data-r="cancel">I cancelled it</button>
+      <div class="field"><label for="appmsg">What did the UPI app say? (optional, saved in the test lab)</label><input class="input" id="appmsg" placeholder="e.g. “Payment declined for security reasons”"></div>
+    </section>`;
+  }else if(p.step==='done'){
+    const ok=p.result==='paid';
+    body=`<div class="bigcheck ${ok?'ok':'no'}"><i>${ok?'✓':'✕'}</i><span>${ok?'Paid and deducted':'Nothing was deducted'}</span></div>
+    ${ok?p.covers.filter(c=>c.amount>0).map(c=>{const x=envById(c.env);return `<div class="between num card" style="padding:12px 14px"><span>${esc(x.name)}</span><span>−${inr(c.amount)} · now <b>${inr(available(x.id))}</b></span></div>`;}).join(''):'<p class="ink2">The envelope balances are unchanged. Your result was saved in the test lab.</p>'}
+    <button class="btn primary block" data-act="close">Done</button>
+    <button class="btn block" data-act="lab">See test results</button>`;
+  }
+  return `<div class="sheet">${head(p.step==='scan'?'Scan to pay':p.step==='amount'?'Amount':p.step==='confirm'?'Confirm':p.step==='return'?'Payment result':p.step==='manual'?'Pay in your UPI app':'Done')}<div class="wrap stack">${body}</div></div>`;
+}
+function handleScanned(raw){
+  const p=ui.pay;if(!p)return;
+  const info=parseUpi(raw);
+  if(info.error){p.err=info.error;p.camera=false;stopScan();render();return;}
+  stopScan();
+  p.info=info;p.err='';p.step='amount';
+  if(!p.envId){const first=S.envelopes.find(x=>x.type==='spend');p.envId=first?first.id:null;}
+  S.lastScan={raw,at:Date.now()};save();
+  render();
+}
+async function onQrFile(ev){
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  const p=ui.pay;stopScan();p.camera=false;p.err='Reading image…';render();
+  const val=await decodeFile(f);
+  if(!val){p.err='No QR code found in that image. Try a sharper, closer photo.';render();return;}
+  handleScanned(val);
+}
+
+/* ---- insufficient modal ---- */
+function renderModal(){
+  if(ui.modal==='short'){
+    const p=ui.pay;const e=envById(p.envId);const have=Math.max(0,available(e.id));const gap=p.amount-have;
+    const others=S.envelopes.filter(x=>x.id!==e.id);
+    const chosen=p.pick||[];
+    let remaining=gap;const plan=[];
+    chosen.forEach(id=>{const b=Math.max(0,available(id));const take=Math.min(b,remaining);if(take>0){plan.push({env:id,amount:take});remaining-=take;}});
+    return `<div class="modal" role="dialog" aria-modal="true" aria-label="Insufficient balance"><div class="box stack">
+      <div class="bigcheck no"><i>!</i><span>Insufficient balance in ${esc(e.name)}</span></div>
+      <p class="ink2">${esc(e.name)} has <b>${inr(have)}</b> but this payment is <b>${inr(p.amount)}</b>. We'd suggest skipping this one. To pay anyway, choose where the other <b>${inr(gap)}</b> comes from:</p>
+      ${others.map(x=>{const b=Math.max(0,available(x.id));const on=chosen.includes(x.id);const locked=x.type==='savings'&&!p.unlockSavings;
+        let s=`${inr(b)} available`;
+        if(x.type==='goal'&&x.monthly>0){const take=Math.min(b,gap);const weeks=Math.max(1,Math.round(take/x.monthly*4.3));s+=` · delays ${esc(x.name)} by about ${weeks} ${weeks===1?'week':'weeks'}`;}
+        if(x.type==='savings')s+=locked?' · locked':' · unlocked for this payment';
+        return `<button class="opt" data-act="pickCover" data-id="${x.id}" aria-pressed="${on}" ${b<=0||locked?'disabled':''}><i class="d" style="background:${x.color}"></i><span><span class="t">${esc(x.name)}</span><br><span class="s num">${s}</span></span><span>${on?'✓':''}</span></button>`;}).join('')}
+      ${others.some(x=>x.type==='savings')&&!p.unlockSavings?`<button class="btn small ghost" data-act="unlockSavings" style="align-self:flex-start">Unlock Savings for this payment</button>`:''}
+      ${remaining>0.004?`<p class="hint num">Still ${inr(remaining)} to cover.</p>`:`<p class="pill good" style="align-self:flex-start">✓ Fully covered</p>`}
+      <button class="btn primary block" data-act="coverGo" ${remaining>0.004?'disabled':''}>Pay ${inr(p.amount)} with these envelopes</button>
+      <button class="btn block" data-act="coverCancel">Don't buy it</button>
+    </div></div>`;
+  }
+  return '';
+}
+
+/* ---- move money ---- */
+function renderMove(){
+  const opts=[`<option value="__un">Unallocated (${inr(unallocated())})</option>`].concat(S.envelopes.map(e=>`<option value="${e.id}">${esc(e.name)} (${inr(available(e.id))})</option>`)).join('');
+  return `<div class="sheet">${head('Move money')}<div class="wrap stack">
+    <div class="field"><label for="mv-from">From</label><select class="input" id="mv-from">${opts}</select></div>
+    <div class="field"><label for="mv-to">To</label><select class="input" id="mv-to">${S.envelopes.map(e=>`<option value="${e.id}" ${ui.moveTo===e.id?'selected':''}>${esc(e.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="mv-amt">Amount (₹)</label><input class="input num" id="mv-amt" type="number" inputmode="decimal" min="1"></div>
+    <p class="err" id="mv-err" role="alert"></p>
+    <button class="btn primary block" data-act="moveGo">Move</button>
+    <p class="hint">Moving money between envelopes doesn't touch your bank account. It changes what each rupee is for.</p>
+  </div></div>`;
+}
+
+/* ---- month end ---- */
+function renderMonthEnd(){
+  const spend=S.envelopes.filter(e=>e.type==='spend'&&available(e.id)>0);
+  const sav=S.envelopes.find(e=>e.type==='savings');
+  return `<div class="sheet">${head('Close '+monthLabel(S.monthIndex))}<div class="wrap stack">
+    <p class="ink2">Choose what happens to each envelope's leftover money, then start ${monthLabel(S.monthIndex+1)}. Next month's allocations are added automatically.</p>
+    ${spend.length?spend.map(e=>`<section class="card stack" style="gap:8px"><div class="between"><b>${esc(e.name)}</b><span class="num">${inr(available(e.id))} left</span></div>
+      <div class="radios" role="radiogroup" aria-label="${esc(e.name)} leftover"><label><input type="radio" name="me-${e.id}" value="carry" checked> Keep for next month</label>${sav?`<label><input type="radio" name="me-${e.id}" value="save"> Move to ${esc(sav.name)}</label>`:''}</div></section>`).join(''):'<p class="hint">No spending envelope has money left.</p>'}
+    <p class="hint">Moving to Savings doesn't move money in your bank. The money stays in your account but is labelled as saved and can't be spent from Lifafa without moving it back.</p>
+    <button class="btn primary block" data-act="monthGo">Start ${monthLabel(S.monthIndex+1)}</button>
+  </div></div>`;
+}
+
+/* ---- test lab ---- */
+async function labChecks(){
+  const det=await getDetector();
+  let cam='unknown';try{if(navigator.permissions){const r=await navigator.permissions.query({name:'camera'});cam=r.state;}}catch(e){}
+  return [
+    ['Page served over HTTPS',window.isSecureContext,'Needed for the camera'],
+    ['Camera API available',!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia),''],
+    ['Camera permission',cam==='denied'?false:cam==='granted'?true:null,cam],
+    ['Built-in QR reader (BarcodeDetector)',!!det,'Fast native scanning on Android Chrome'],
+    ['Backup QR reader (jsQR) loaded',!!window.jsQR,'Used when the built-in reader is missing'],
+    ['Android device',isAndroid,'upi:// links are most reliable on Android'],
+    ['iPhone / iPad',isIOS?true:false,isIOS?'UPI links are less reliable on iOS':''],
+  ];
+}
+function renderLab(){
+  const tests=(S&&S.tests)||[];
+  return `<div class="sheet">${head('UPI test lab')}<div class="wrap stack">
+    <p class="ink2">Use this page to find out whether scanning and opening UPI apps works on your team's phones before you build the full app.</p>
+    <section class="card stack" style="gap:10px"><h3 style="font-size:17px">This device</h3><div class="checks" id="checks"><p class="hint">Checking…</p></div><p class="hint" style="word-break:break-all">${esc(navigator.userAgent)}</p></section>
+    <section class="card stack" style="gap:10px"><h3 style="font-size:17px">Quick link test (no scan)</h3>
+      <p class="hint">Opens your UPI app for a ₹1 payment to the UPI ID you enter. Use a friend's ID or your own business QR's ID.</p>
+      <div class="field"><label for="lt-pa">Payee UPI ID</label><input class="input" id="lt-pa" placeholder="name@okaxis" value="${esc(ui.labPa||'')}"></div>
+      <div class="field"><label for="lt-pn">Payee name</label><input class="input" id="lt-pn" placeholder="Their name" value="${esc(ui.labPn||'')}"></div>
+      <button class="btn primary" data-act="labLink">Start ₹1 test payment</button>
+    </section>
+    <section class="card stack" style="gap:10px"><h3 style="font-size:17px">Make a test QR</h3>
+      <p class="hint">Shows a UPI QR for the ID above, so a teammate can scan it with Lifafa on their phone.</p>
+      <label class="row" style="font-size:14px"><input type="checkbox" id="lt-am" ${ui.labAm?'checked':''}> Include ₹1 in the QR (a “dynamic” QR)</label>
+      <button class="btn" data-act="labQR">Show QR</button>
+      <div id="testqr" class="qrbox" hidden></div>
+      <p class="hint" id="testqr-note"></p>
+    </section>
+    <section class="card stack" style="gap:10px"><div class="between"><h3 style="font-size:17px">Results on this phone</h3>${tests.length?`<button class="btn small" data-act="copyLog">Copy results</button>`:''}</div>
+      ${tests.length?`<div class="scrollx"><table class="log"><thead><tr><th>When</th><th>Method</th><th>App opened?</th><th>Result</th><th>Payee</th><th>App message</th></tr></thead><tbody>${tests.slice().reverse().map(t=>`<tr><td>${new Date(t.at).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(t.variant)}</td><td>${t.opened?'Yes':'No'}</td><td>${esc(t.result)}</td><td>${esc(t.pa)}${t.merchant?' (merchant)':''}</td><td>${esc(t.msg||'')}</td></tr>`).join('')}</tbody></table></div>
+      <textarea class="input" id="logtext" hidden readonly></textarea>
+      <button class="btn small danger" data-act="clearLog" style="align-self:flex-start">Clear results</button>`:'<p class="hint">No tests yet. Try a payment and your results show up here.</p>'}
+    </section>
+  </div></div>`;
+}
+async function fillChecks(){
+  const el=$('#checks');if(!el)return;
+  const rows=await labChecks();
+  el.innerHTML=rows.map(([k,v,note])=>`<div class="check"><span>${esc(k)}${note?`<br><span class="hint">${esc(note)}</span>`:''}</span><span class="${v===true?'ok':v===false?'bad':'muted'}">${v===true?'Yes':v===false?'No':'—'}</span></div>`).join('');
+}
+function drawTestQR(){fillChecks();}
+function showTestQR(){
+  const pa=($('#lt-pa').value||'').trim(),pn=($('#lt-pn').value||'').trim()||pa;
+  ui.labPa=pa;ui.labPn=pn;ui.labAm=$('#lt-am').checked;
+  const box=$('#testqr'),note=$('#testqr-note');
+  if(!/^[\w.\-]{2,}@[a-z]{2,}$/i.test(pa)){note.textContent='Enter a valid UPI ID first, like name@okaxis.';box.hidden=true;return;}
+  const link=`upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}${ui.labAm?'&am=1.00':''}&cu=INR`;
+  if(typeof window.qrcode!=='function'){note.textContent='The QR generator could not load. Check the internet connection and reload.';box.hidden=true;return;}
+  const qr=window.qrcode(0,'M');qr.addData(link);qr.make();
+  box.innerHTML=qr.createSvgTag({cellSize:6,margin:2,scalable:true});box.hidden=false;
+  note.textContent=link;
+}
+
+/* ---------------- payment launch & return ---------------- */
+let hiddenSince=0;
+document.addEventListener('visibilitychange',()=>{
+  const p=ui.pay;
+  if(document.hidden){if(p&&p.launchedAt)hiddenSince=Date.now();return;}
+  if(p&&p.launchedAt&&(p.step==='confirm'||p.step==='return')){
+    if(hiddenSince&&hiddenSince>=p.launchedAt)p.opened=true;
+    clearTimeout(p.noAppTimer);
+    const keep=$('#appmsg')?$('#appmsg').value:'';
+    p.step='return';render();if(keep&&$('#appmsg'))$('#appmsg').value=keep;
+  }
+});
+function launch(variant){
+  const p=ui.pay;
+  if(!p.txGroup){
+    p.txGroup=nid('g');
+    p.covers.filter(c=>c.amount>0).forEach(c=>S.tx.push({id:nid('t'),env:c.env,amount:-c.amount,type:'spend',note:p.info.pn,payee:p.info.pa,status:'pending',month:S.monthIndex,group:p.txGroup,at:Date.now()}));
+    save();
+  }
+  p.variant=variant;p.launchedAt=Date.now();p.opened=false;hiddenSince=0;
+  clearTimeout(p.noAppTimer);
+  p.noAppTimer=setTimeout(()=>{if(ui.pay===p&&p.step==='confirm'&&!document.hidden){p.step='return';render();}},7000);
+}
+function cancelPending(){const p=ui.pay;if(p&&p.txGroup&&p.step!=='done'){S.tx.forEach(t=>{if(t.group===p.txGroup&&t.status==='pending')t.status='cancelled';});save();}if(p)clearTimeout(p.noAppTimer);}
+function finishPay(result){
+  const p=ui.pay;const msg=($('#appmsg')||{}).value||'';
+  const status=result==='paid'?'confirmed':'cancelled';
+  S.tx.forEach(t=>{if(t.group===p.txGroup)t.status=status;});
+  if(p.variant!=='simulated')S.tests.push({at:Date.now(),variant:p.variant,opened:!!p.opened,result:{paid:'Paid',failed:'Failed or blocked',noapp:'No app opened',cancel:'Cancelled by user'}[result],pa:p.info.pa,merchant:p.info.merchant,amount:p.amount,msg:msg.slice(0,140),qr:String(p.info.raw||'').slice(0,300),ua:isAndroid?'Android':isIOS?'iOS':'Other'});
+  save();p.result=result;p.step='done';render();
+}
+
+/* ---------------- events ---------------- */
+app.addEventListener('click',async ev=>{
+  const b=ev.target.closest('[data-act]');if(!b||b.disabled)return;
+  const act=b.dataset.act;
+  switch(act){
+    case 'demo':S=seed();save();ui.view='dash';render();window.scrollTo(0,0);break;
+    case 'open':ui.view='dash';render();window.scrollTo(0,0);break;
+    case 'home':stopScan();ui.view='home';ui.sheet=null;ui.modal=null;render();window.scrollTo(0,0);break;
+    case 'setup':ui.draft=S?{income:S.income,envelopes:S.envelopes.map(e=>({...e}))}:{income:40000,envelopes:[{name:'Food',type:'spend',monthly:7000},{name:'Travel',type:'spend',monthly:2500},{name:'Shopping',type:'spend',monthly:2500},{name:'Savings',type:'savings',monthly:8000}]};ui.setupErr='';ui.view='setup';ui.sheet=null;render();window.scrollTo(0,0);break;
+    case 'envadd':readSetup();ui.draft.envelopes.push({name:'',type:'spend',monthly:''});render();break;
+    case 'envdel':readSetup();ui.draft.envelopes.splice(+b.dataset.i,1);render();break;
+    case 'setupSave':{readSetup();const d=ui.draft;const envs=d.envelopes.filter(e=>e.name);
+      if(!(d.income>0)){ui.setupErr='Enter your monthly income.';render();return;}
+      if(!envs.length){ui.setupErr='Add at least one envelope.';render();return;}
+      if(sum(envs.map(e=>e.monthly))>d.income){ui.setupErr='Your envelopes add up to more than your income. Lower some amounts.';render();return;}
+      if(envs.some(e=>e.type==='goal'&&!(e.target>0))){ui.setupErr='Give each goal envelope a target amount.';render();return;}
+      const tests=S?S.tests:[];
+      S={income:d.income,monthIndex:0,envelopes:envs.map((e,i)=>({id:e.id||nid('env'),name:e.name,type:e.type,monthly:+e.monthly||0,target:e.type==='goal'?e.target:undefined,color:COLORS[i%COLORS.length]})),tx:[],tests,demo:false};
+      S.envelopes.forEach(e=>{if(e.monthly>0)S.tx.push({id:nid('t'),env:e.id,amount:e.monthly,type:'alloc',note:'Monthly allocation',status:'confirmed',month:0,at:Date.now()});});
+      save();ui.view='dash';render();window.scrollTo(0,0);toast('Envelopes saved');break;}
+    case 'env':ui.envId=b.dataset.id;ui.sheet='env';render();break;
+    case 'close':stopScan();if(ui.pay&&(ui.pay.step==='return'||ui.pay.step==='manual')){toast('Tell us whether the payment went through first');return;}cancelPending();ui.sheet=ui.sheet==='pay'&&ui.envId&&ui.pay&&ui.pay.step==='done'?'env':null;ui.pay=null;ui.modal=null;render();break;
+    case 'payFrom':ui.pay=newPay(b.dataset.id);ui.sheet='pay';render();break;
+    case 'payAny':ui.pay=newPay(null);ui.envId=null;ui.sheet='pay';render();break;
+    case 'camOn':ui.pay.camera=true;ui.pay.camErr='';ui.pay.err='';render();break;
+    case 'pickEnv':{const v=$('#payamt');if(v&&!v.readOnly)ui.pay.amount=+v.value||null;ui.pay.envId=b.dataset.id;render();break;}
+    case 'checkBal':{const p=ui.pay;const amt=p.info.am||+$('#payamt').value;
+      if(!(amt>0)){p.err='Enter an amount greater than zero.';render();return;}
+      if(amt>100000){p.err='UPI payments are usually capped at ₹1,00,000. Enter a smaller amount.';render();return;}
+      if(!p.envId){p.err='Choose an envelope.';render();return;}
+      p.amount=Math.round(amt*100)/100;p.err='';
+      const have=available(p.envId);
+      if(have>=p.amount){p.covers=[{env:p.envId,amount:p.amount}];p.step='confirm';render();}
+      else{p.pick=[];p.unlockSavings=false;ui.modal='short';render();}
+      break;}
+    case 'pickCover':{const p=ui.pay;const id=b.dataset.id;p.pick=p.pick.includes(id)?p.pick.filter(x=>x!==id):p.pick.concat(id);render();break;}
+    case 'unlockSavings':ui.pay.unlockSavings=true;render();break;
+    case 'coverGo':{const p=ui.pay;const have=Math.max(0,available(p.envId));let rem=p.amount-have;const covers=[{env:p.envId,amount:have}];
+      p.pick.forEach(id=>{const bb=Math.max(0,available(id));const t=Math.min(bb,rem);if(t>0){covers.push({env:id,amount:Math.round(t*100)/100});rem-=t;}});
+      p.covers=covers;ui.modal=null;p.step='confirm';render();break;}
+    case 'coverCancel':ui.modal=null;render();toast('Good call. Nothing was paid.');break;
+    case 'launch':launch(b.dataset.variant);break; // the link itself navigates
+    case 'appScanner':{const p=ui.pay;launch('app-scanner');clearTimeout(p.noAppTimer);p.opened=true;p.step='manual';render();break;}
+    case 'simulate':{const p=ui.pay;launch('simulated');clearTimeout(p.noAppTimer);p.opened=true;p.step='return';render();break;}
+    case 'cancelPay':cancelPending();ui.pay=null;ui.sheet=ui.envId?'env':null;render();break;
+    case 'result':finishPay(b.dataset.r);break;
+    case 'move':ui.moveTo=b.dataset.to||null;ui.sheet='move';render();if(ui.moveTo)$('#mv-to').value=ui.moveTo;break;
+    case 'moveGo':{const from=$('#mv-from').value,to=$('#mv-to').value,amt=+$('#mv-amt').value;const er=$('#mv-err');
+      if(!(amt>0)){er.textContent='Enter an amount greater than zero.';return;}
+      if(from===to){er.textContent='Pick two different envelopes.';return;}
+      const have=from==='__un'?unallocated():available(from);
+      if(amt>have){er.textContent=`Only ${inr(have)} is available there.`;return;}
+      if(from==='__un'){S.tx.push({id:nid('t'),env:to,amount:amt,type:'alloc',note:'From unallocated',status:'confirmed',month:S.monthIndex,at:Date.now()});}
+      else{const g=nid('g');S.tx.push({id:nid('t'),env:from,amount:-amt,type:'transfer',note:'Moved to '+envById(to).name,status:'confirmed',month:S.monthIndex,group:g,at:Date.now()});S.tx.push({id:nid('t'),env:to,amount:amt,type:'transfer',note:'Moved from '+envById(from).name,status:'confirmed',month:S.monthIndex,group:g,at:Date.now()});}
+      save();ui.sheet=null;render();toast(`Moved ${inr(amt)}`);break;}
+    case 'monthend':ui.sheet='monthend';render();break;
+    case 'monthGo':{const sav=S.envelopes.find(e=>e.type==='savings');let moved=0;
+      S.envelopes.filter(e=>e.type==='spend'&&available(e.id)>0).forEach(e=>{const r=document.querySelector(`input[name="me-${e.id}"]:checked`);if(r&&r.value==='save'&&sav){const a=available(e.id);moved+=a;S.tx.push({id:nid('t'),env:e.id,amount:-a,type:'transfer',note:'Leftover moved to '+sav.name,status:'confirmed',month:S.monthIndex,at:Date.now()});S.tx.push({id:nid('t'),env:sav.id,amount:a,type:'transfer',note:'Leftover from '+e.name,status:'confirmed',month:S.monthIndex,at:Date.now()});}});
+      S.monthIndex++;S.envelopes.forEach(e=>{if(e.monthly>0)S.tx.push({id:nid('t'),env:e.id,amount:e.monthly,type:'alloc',note:'Monthly allocation',status:'confirmed',month:S.monthIndex,at:Date.now()});});
+      save();ui.sheet=null;render();toast(moved>0?`${inr(moved)} moved to savings · ${monthLabel(S.monthIndex)} started`:`${monthLabel(S.monthIndex)} started`);break;}
+    case 'lab':stopScan();if(!S){S=seed();save();ui.view='dash';}ui.sheet='lab';ui.pay=null;ui.modal=null;render();break;
+    case 'labLink':{const pa=($('#lt-pa').value||'').trim();const pn=($('#lt-pn').value||'').trim()||pa;ui.labPa=pa;ui.labPn=pn;
+      const info=parseUpi(`upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}`);
+      if(info.error||!/^[\w.\-]{2,}@[a-z]{2,}$/i.test(pa)){toast('Enter a valid UPI ID, like name@okaxis');return;}
+      const first=S.envelopes.find(x=>x.type==='spend');ui.pay=Object.assign(newPay(first&&first.id),{info,amount:1,step:'confirm',covers:[{env:first.id,amount:1}]});ui.sheet='pay';render();break;}
+    case 'labQR':showTestQR();break;
+    case 'copyLog':{const lines=['When\tPhone\tMethod\tApp opened\tResult\tPayee\tMerchant QR\tApp message\tQR contents'].concat(S.tests.map(t=>[new Date(t.at).toLocaleString('en-IN'),t.ua,t.variant,t.opened?'Yes':'No',t.result,t.pa,t.merchant?'Yes':'No',t.msg||'',t.qr||''].join('\t')));const txt=lines.join('\n');
+      try{await navigator.clipboard.writeText(txt);toast('Results copied');}catch(e){const ta=$('#logtext');ta.hidden=false;ta.value=txt;ta.select();toast('Select and copy the text below');}break;}
+    case 'clearLog':S.tests=[];save();render();break;
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(ui.sheet||ui.modal)){if(ui.modal){ui.modal=null;}else{if(ui.pay&&ui.pay.step==='return')return;stopScan();cancelPending();ui.sheet=null;ui.pay=null;}render();}});
+
+/* ---------------- boot ---------------- */
+load();
+if(S)ui.view='dash';
+render();
+})();
+</script>
+</body>
+</html>
