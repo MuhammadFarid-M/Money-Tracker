@@ -1,13 +1,13 @@
-# Kharcha: AI Money Diary with Envelopes
+# Budgetly: AI Money Diary with Envelopes
 
 A mobile-first web prototype for tracking money with envelope budgeting.
 
 **Live site (GitHub Pages):** https://muhammadfarid-m.github.io/Money-Tracker/
 
 ## The idea
-UPI made spending effortless and invisible. Kharcha gives every rupee of your salary an envelope, makes logging effortless, and shows what a purchase costs your goals *before* you buy it.
+UPI made spending effortless and invisible. Budgetly gives every rupee of your salary an envelope, makes logging effortless, and shows what a purchase costs your goals *before* you buy it.
 
-Full problem statement and solution: [`docs/Kharcha-Problem-and-Solution.md`](docs/Kharcha-Problem-and-Solution.md)
+Full problem statement and solution: [`docs/Budgetly-Problem-and-Solution.md`](docs/Budgetly-Problem-and-Solution.md)
 
 ## What's in the prototype (`index.html`)
 - **Home page** with the problem, features and a comparison with other apps

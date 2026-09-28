@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3531A8">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
-<title>Kharcha Money Diary</title>
+<title>Budgetly Money Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -348,7 +348,7 @@ const CATS=[
 ];
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const cc=id=>`var(--c-${CAT[id]?id:'other'})`;
-const KEY='kharcha.v1';
+const KEY='budgetly.v1';const OLD_KEY='kharcha.v1';
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sum=a=>a.reduce((x,y)=>x+(+y||0),0);
@@ -375,7 +375,7 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 
 /* ---------- storage ---------- */
 let S=null;
-function load(){try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.profile&&Array.isArray(v.expenses))S=v;}}catch(e){S=null;}}
+function load(){try{const raw=localStorage.getItem(KEY)||localStorage.getItem(OLD_KEY);if(raw){const v=JSON.parse(raw);if(v&&v.profile&&Array.isArray(v.expenses))S=v;}}catch(e){S=null;}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){
   // quota: drop bill thumbnails and retry once
   try{if(S&&S.bills){Object.values(S.bills).forEach(b=>{b.thumb=null;});localStorage.setItem(KEY,JSON.stringify(S));}}catch(e2){}
@@ -705,7 +705,7 @@ function dataForAI(){
   };
 }
 function chatRules(withTools){
-  return `You are Kharcha, the assistant inside a personal expense-tracking app used in India.
+  return `You are Budgetly, the assistant inside a personal expense-tracking app used in India.
 Answer using ONLY the DATA below. Every rupee amount you state must appear in DATA or be a simple sum or difference of amounts in DATA. If DATA does not cover the question, say what you cannot see.
 Style: short and friendly. 2 to 5 sentences, or up to 5 bullet lines starting with "- ". Bold the single most important number with **double asterisks**. Write rupees like ₹12,450 (Indian digit grouping). No headings, no tables.
 Envelopes: every spending category has a monthly envelope; "left" is what remains this month. To judge whether a purchase is affordable, compare its price with the matching envelope's "left". If it is short, suggest covering the gap from unallocated money first, then envelopes with money left; taking money from a goal delays that goal by about (amount ÷ monthly contribution) months; Savings are locked. Leftovers follow each envelope's leftoverRule at month end.
@@ -740,12 +740,12 @@ const icoOf=lv=>({good:'✓',warn:'!',crit:'▲',info:'i'}[lv]);
 function renderHome(){
   const has=!!S;
   return `<div class="home">
-  <header class="home-top"><span class="brand">Khar<span>cha</span></span>${has?`<button class="btn small" data-act="continue">Open my diary</button>`:''}</header>
+  <header class="home-top"><span class="brand">Budget<span>ly</span></span>${has?`<button class="btn small" data-act="continue">Open my diary</button>`:''}</header>
   <section class="hero">
     <div>
       <p class="eyebrow">An AI money diary for the UPI generation</p>
       <h1 style="margin-top:10px">Know where every rupee goes, <em>while there's still time to change it.</em></h1>
-      <p class="lede">Split your salary into envelopes like Food, Travel and a Bike goal. Snap a bill or type “chai 20, auto 60” and Kharcha takes it out of the right envelope, tells you each morning how much is safe to spend, and answers “Can I afford this?” before you buy.</p>
+      <p class="lede">Split your salary into envelopes like Food, Travel and a Bike goal. Snap a bill or type “chai 20, auto 60” and Budgetly takes it out of the right envelope, tells you each morning how much is safe to spend, and answers “Can I afford this?” before you buy.</p>
       <div class="cta">
         <button class="btn primary" data-act="demo">Explore the demo</button>
         <button class="btn" data-act="fresh">Start with my own numbers</button>
@@ -776,7 +776,7 @@ function renderHome(){
   </section>
 
   <section class="home-sec">
-    <p class="eyebrow">What Kharcha does</p>
+    <p class="eyebrow">What Budgetly does</p>
     <h2 style="margin-top:8px">Plan with envelopes. Log in seconds. Check before you buy.</h2>
     <div class="fgrid">
       <div class="fitem"><span class="k">Snap a bill</span><h3>Bills split item by item</h3><p>AI reads the photo and sorts each line into a category, so one DMart bill becomes groceries, snacks and household. Or just type “chai 20, auto 60”.</p><p class="ex">₹1,654 bill → Groceries ₹1,033 · Food ₹254 · Other ₹367</p></div>
@@ -790,7 +790,7 @@ function renderHome(){
     <p class="eyebrow">How it's different</p>
     <h2 style="margin-top:8px">Built for daily decisions, not month-end reports.</h2>
     <div class="scrollx"><table class="cmp">
-      <thead><tr><th></th><th>Typical expense trackers</th><th>Bank or UPI app history</th><th>Kharcha</th></tr></thead>
+      <thead><tr><th></th><th>Typical expense trackers</th><th>Bank or UPI app history</th><th>Budgetly</th></tr></thead>
       <tbody>
         <tr><td>Logging</td><td>Manual forms</td><td>Automatic, unlabelled</td><td class="us">Bill photo, quick text, form or chat</td></tr>
         <tr><td>Bills</td><td>Total only</td><td>Merchant name only</td><td class="us">Split item by item into categories</td></tr>
@@ -804,7 +804,7 @@ function renderHome(){
     </table></div>
     <div class="cta"><button class="btn primary" data-act="demo">Explore the demo</button><button class="btn" data-act="fresh">Start with my own numbers</button></div>
   </section>
-  <footer class="home-foot"><span>Kharcha · hackathon prototype</span><span>Expenses are stored only in this browser.</span></footer>
+  <footer class="home-foot"><span>Budgetly · hackathon prototype</span><span>Expenses are stored only in this browser.</span></footer>
   </div>`;
 }
 
@@ -878,7 +878,7 @@ function validateProfile(p){
 }
 function renderSetup(){
   return `<div class="shell" style="padding-block:24px 60px">
-    <div class="between" style="margin-bottom:18px"><span class="brand">Khar<span>cha</span></span><button class="btn small ghost" data-act="home">Back</button></div>
+    <div class="between" style="margin-bottom:18px"><span class="brand">Budget<span>ly</span></span><button class="btn small ghost" data-act="home">Back</button></div>
     <h1 style="font-size:30px;font-weight:800">Set up your month</h1>
     <p class="ink2" style="margin:8px 0 22px">Your salary, fixed costs, and an envelope for each kind of spending. You can change them anytime in Settings.</p>
     ${profileForm(ui.draft,true)}
@@ -1144,7 +1144,7 @@ function renderAdd(){
     <p class="err" id="adderr" role="alert"></p>
     <button class="btn primary block" data-act="saveTyped">Add expense</button>`;
   }else if(a.mode==='quick'){
-    body=`<div class="field"><label for="quicktext">List what you spent</label><textarea class="input" id="quicktext" placeholder="chai 20, auto 60, lunch 180">${esc(a.quickText||'')}</textarea><span class="hint">Separate items with commas or new lines. Kharcha guesses each category; you can change it before saving.</span></div>
+    body=`<div class="field"><label for="quicktext">List what you spent</label><textarea class="input" id="quicktext" placeholder="chai 20, auto 60, lunch 180">${esc(a.quickText||'')}</textarea><span class="hint">Separate items with commas or new lines. Budgetly guesses each category; you can change it before saving.</span></div>
     ${a.quick?(a.quick.length?`<div class="stack" style="gap:0">${a.quick.map((q,i)=>`<div class="itemrow"><span class="nm">${esc(q.note)}</span><span class="num" style="text-align:right;font-weight:700">${inr(q.amount)}</span><select class="input" id="q-cat-${i}" aria-label="Category for ${esc(q.note)}">${CATS.map(c=>`<option value="${c.id}" ${q.cat===c.id?'selected':''}>${c.name}</option>`).join('')}</select></div>`).join('')}</div>
       <button class="btn primary block" data-act="saveQuick">Add ${a.quick.length} ${a.quick.length===1?'expense':'expenses'} · ${inr(sum(a.quick.map(q=>q.amount)))}</button>`:`<p class="err">No amounts found. Write each item with a number, like “auto 60”.</p>`):`<button class="btn primary block" data-act="parseQuick">Sort these</button>`}`;
   }else{
@@ -1417,7 +1417,7 @@ function render(){
   else{
     const tab=ui.tab;
     html=`<div class="shell"${tab==='chat'?' style="padding-bottom:230px"':''}>
-      <header class="apphead"><div><p class="eyebrow">${tab==='today'||tab==='env'?monthName(CUR):tab==='history'?'History':'Assistant'}</p><h1>${tab==='today'?`Hi, ${esc(S.profile.name||'there')}`:tab==='env'?'Envelopes':tab==='history'?'Your months':'Ask Kharcha'}</h1></div><button class="iconbtn" data-act="settings" aria-label="Settings">${I.gear}</button></header>
+      <header class="apphead"><div><p class="eyebrow">${tab==='today'||tab==='env'?monthName(CUR):tab==='history'?'History':'Assistant'}</p><h1>${tab==='today'?`Hi, ${esc(S.profile.name||'there')}`:tab==='env'?'Envelopes':tab==='history'?'Your months':'Ask Budgetly'}</h1></div><button class="iconbtn" data-act="settings" aria-label="Settings">${I.gear}</button></header>
       <div class="stack">${tab==='today'?renderToday():tab==='env'?renderEnvelopes():tab==='history'?renderHistory():renderChat()}</div>
     </div>
     ${tab==='chat'?chatDock():`<div class="fabwrap"><div class="fabin"><button class="fab" data-act="add">${I.plus}Add expense</button></div></div>`}
@@ -1486,7 +1486,7 @@ async function monthTips(k){
   ui.monthAI[k]={busy:true,text:''};render();
   const st=ui.monthAI[k];
   try{
-    const r=await SAMPLE(`You are Kharcha, an expense-tracking assistant for users in India. Using ONLY the DATA, give exactly 3 short, specific tips for next month as bullet lines starting with "- ". Each tip names a category and a rupee amount taken from DATA (or a simple difference of DATA amounts). Fixed monthly costs are planned; don't suggest cutting rent. Bold one key number per tip with **. No intro or closing line.
+    const r=await SAMPLE(`You are Budgetly, an expense-tracking assistant for users in India. Using ONLY the DATA, give exactly 3 short, specific tips for next month as bullet lines starting with "- ". Each tip names a category and a rupee amount taken from DATA (or a simple difference of DATA amounts). Fixed monthly costs are planned; don't suggest cutting rent. Bold one key number per tip with **. No intro or closing line.
 DATA: ${JSON.stringify(payload)}`,{modelTier:'quick',onText:({text})=>{st.text=text;st.busy=false;const el=document.getElementById('aitips');if(el)el.innerHTML=md(text);}});
     st.text=r.text;
   }catch(e){if(BLOCK.includes(e&&e.code))aiBlocked=true;st.err=errCopy(e&&e.code);if(e&&e.text)st.text=e.text;}

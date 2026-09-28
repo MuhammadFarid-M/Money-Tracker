@@ -1,6 +1,4 @@
-# Kharcha: Your AI Money Diary
-
-*Working name: "kharcha" is Hindi for expense.*
+# Budgetly: Your AI Money Diary
 
 ---
 
@@ -23,7 +21,7 @@ With UPI and cards, a ₹40 chai and a ₹4,000 pair of shoes both take the same
 
 ## Our Solution
 
-**Kharcha is an AI money diary built on envelope budgeting. Every rupee of your salary gets an envelope, logging is effortless, and before you buy something Kharcha shows what it really costs your goals.**
+**Budgetly is an AI money diary built on envelope budgeting. Every rupee of your salary gets an envelope, logging is effortless, and before you buy something Budgetly shows what it really costs your goals.**
 
 ### 1. Give every rupee an envelope
 The user enters their **monthly salary** and **fixed monthly costs** (rent, Wi-Fi, subscriptions; logged automatically every month), then splits the rest into envelopes:
@@ -31,7 +29,7 @@ The user enters their **monthly salary** and **fixed monthly costs** (rent, Wi-F
 - **Goal envelopes** with a target: *Bike ₹2,00,000 at ₹12,000 a month*, with progress and months to go.
 - **Savings**, locked so it doesn't get spent by accident.
 
-Kharcha shows how much of the salary is still **unallocated**.
+Budgetly shows how much of the salary is still **unallocated**.
 
 ### 2. Log spending in seconds
 - **📸 Snap a bill:** AI reads the photo and **splits it item by item into categories**. A single supermarket bill becomes groceries + snacks + household.
@@ -40,11 +38,11 @@ Kharcha shows how much of the salary is still **unallocated**.
 - **💬 Tell the assistant:** *"spent 250 on dinner"* gets logged from the chat.
 
 ### 3. Check before you buy
-- **"Can I afford this?":** type a price, e.g. *Shoes ₹5,000*. Kharcha checks the matching envelope.
+- **"Can I afford this?":** type a price, e.g. *Shoes ₹5,000*. Budgetly checks the matching envelope.
   - If it fits: *"Yes. Shopping goes from ₹7,000 to ₹2,000, about ₹680 a day."*
   - If it doesn't: *"Shopping has ₹2,000. You're ₹3,000 short."* Then it shows the trade-offs: take it from unallocated money, from another envelope (*"leaves Travel ₹500"*), or from a goal (*"delays your Bike by about 1 week"*). Savings stay locked unless you unlock them.
-  - **Skip it** and Kharcha records how much you kept in your plan.
-- **Overspending gets covered:** if an expense takes an envelope below zero, Kharcha asks which envelope should cover it, so the plan always adds up.
+  - **Skip it** and Budgetly records how much you kept in your plan.
+- **Overspending gets covered:** if an expense takes an envelope below zero, Budgetly asks which envelope should cover it, so the plan always adds up.
 - **Month end:** leftovers in each envelope either **move to Savings** or **carry over** to next month (the user chooses per envelope).
 
 ### 4. Know what's safe to spend today
@@ -70,9 +68,9 @@ The app's code calculates every number; the AI only explains it, so answers stay
 
 ---
 
-## How Kharcha Is Different
+## How Budgetly Is Different
 
-| | Typical expense trackers | Bank / UPI app history | **Kharcha** |
+| | Typical expense trackers | Bank / UPI app history | **Budgetly** |
 |---|---|---|---|
 | Budgeting | One monthly limit, or none | None | **Envelopes per category and goal; leftovers roll into Savings** |
 | Before buying | Nothing | Nothing | **"Can I afford this?" shows the trade-off first** |
